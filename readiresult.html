@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redmine QA 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .input-table th, .input-table td {
+            padding: 8px;
+            text-align: center;
+        }
+        .no-wrap {
+            white-space: nowrap;
+        }
+        .input-table th:nth-child(1), .input-table td:nth-child(1) {
+            min-width: 100px;
+        }
+        .input-table th:nth-child(2), .input-table td:nth-child(2) {
+            min-width: 150px;
+        }
+        .input-table input[type="text"] {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6">Redmine QA 대시보드</h1>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">테스트 기간 설정</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">통합테스트 기간 (IT)</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input type="date" class="block w-full rounded-l-md border-gray-300 p-2">
+                        <input type="date" class="block w-full rounded-r-md border-gray-300 p-2">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">사용자테스트 기간 (CANB R&D)</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input type="date" class="block w-full rounded-l-md border-gray-300 p-2">
+                        <input type="date" class="block w-full rounded-r-md border-gray-300 p-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6 overflow-x-auto">
+            <h2 class="text-xl font-semibold mb-4">담당자별 통계 입력</h2>
+            <table id="inputTable" class="input-table w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="rounded-tl-lg no-wrap">담당자</th>
+                        <th class="no-wrap">부서명</th>
+                        <th class="no-wrap">합계</th>
+                        <th colspan="2" class="no-wrap">결함</th>
+                        <th colspan="2" class="no-wrap">개선</th>
+                        <th colspan="2" class="no-wrap">검토</th>
+                        <th colspan="2" class="rounded-tr-lg no-wrap">디자인</th>
+                        <th class="w-10"></th>
+                    </tr>
+                    <tr class="bg-gray-100">
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th class="no-wrap">총</th><th class="no-wrap">잔여</th>
+                        <th class="no-wrap">총</th><th class="no-wrap">잔여</th>
+                        <th class="no-wrap">총</th><th class="no-wrap">잔여</th>
+                        <th class="no-wrap">총</th><th class="no-wrap">잔여</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-row-id="1">
+                        <td><input type="text" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" placeholder="담당자 이름"></td>
+                        <td><input type="text" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" placeholder="부서명"></td>
+                        <td class="total-col">0</td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                        <td><button class="remove-row bg-gray-300 text-gray-700 p-2 rounded-md shadow-sm">-</button></td>
+                    </tr>
+                </tbody>
+                <tfoot class="font-bold">
+                    <tr class="bg-gray-200">
+                        <td colspan="2" class="text-left">IT본부 소계</td>
+                        <td id="itSubtotal" class="bg-gray-50">0</td>
+                        <td id="itTotalDefect" class="bg-gray-50">0</td>
+                        <td id="itRemainingDefect" class="bg-gray-50">0</td>
+                        <td id="itTotalImprovement" class="bg-gray-50">0</td>
+                        <td id="itRemainingImprovement" class="bg-gray-50">0</td>
+                        <td id="itTotalReview" class="bg-gray-50">0</td>
+                        <td id="itRemainingReview" class="bg-gray-50">0</td>
+                        <td id="itTotalDesign" class="bg-gray-50">0</td>
+                        <td id="itRemainingDesign" class="bg-gray-50">0</td>
+                        <td></td>
+                    </tr>
+                    <tr class="bg-gray-200">
+                        <td colspan="2" class="text-left">타부서 소계</td>
+                        <td id="otherSubtotal" class="bg-gray-50">0</td>
+                        <td id="otherTotalDefect" class="bg-gray-50">0</td>
+                        <td id="otherRemainingDefect" class="bg-gray-50">0</td>
+                        <td id="otherTotalImprovement" class="bg-gray-50">0</td>
+                        <td id="otherRemainingImprovement" class="bg-gray-50">0</td>
+                        <td id="otherTotalReview" class="bg-gray-50">0</td>
+                        <td id="otherRemainingReview" class="bg-gray-50">0</td>
+                        <td id="otherTotalDesign" class="bg-gray-50">0</td>
+                        <td id="otherRemainingDesign" class="bg-gray-50">0</td>
+                        <td></td>
+                    </tr>
+                    <tr class="bg-gray-300">
+                        <td colspan="2" class="text-left">총합계</td>
+                        <td id="grandTotal" class="bg-gray-100">0</td>
+                        <td id="totalDefect" class="bg-gray-100">0</td>
+                        <td id="totalRemainingDefect" class="bg-gray-100">0</td>
+                        <td id="totalImprovement" class="bg-gray-100">0</td>
+                        <td id="totalRemainingImprovement" class="bg-gray-100">0</td>
+                        <td id="totalReview" class="bg-gray-100">0</td>
+                        <td id="totalRemainingReview" class="bg-gray-100">0</td>
+                        <td id="totalDesign" class="bg-gray-100">0</td>
+                        <td id="totalRemainingDesign" class="bg-gray-100">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="mt-4 flex justify-center">
+                <button id="addRow" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md">+ 행 추가</button>
+            </div>
+        </div>
+
+        <div id="dashboard" class="mt-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 요약 카드는 스크립트로 동적 생성 -->
+            </div>
+            
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-center">유형별 이슈 현황</h2>
+                <div class="chart-container flex justify-center">
+                    <canvas id="issueChart" class="w-full max-w-xl"></canvas>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-center">QA/개발 주요 통계</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="metricsContainer">
+                    <!-- Metrics will be dynamically added here -->
+                    <div class="bg-gray-100 p-4 rounded-lg shadow">
+                        <p class="text-sm font-medium text-gray-500">결함 등록률</p>
+                        <p id="defectRate" class="text-2xl font-bold text-gray-900 mt-1">0%</p>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-lg shadow">
+                        <p class="text-sm font-medium text-gray-500">잔여 이슈율</p>
+                        <p id="remainingRate" class="text-2xl font-bold text-gray-900 mt-1">0%</p>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-lg shadow">
+                        <p class="text-sm font-medium text-gray-500">평균 해결 시간</p>
+                        <p id="avgResolutionTime" class="text-2xl font-bold text-gray-900 mt-1">0일</p>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-lg shadow">
+                        <p class="text-sm font-medium text-gray-500">테스트 커버리지</p>
+                        <p id="testCoverage" class="text-2xl font-bold text-gray-900 mt-1">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputTableBody = document.querySelector('#inputTable tbody');
+            const addRowBtn = document.getElementById('addRow');
+            const issueChartCanvas = document.getElementById('issueChart');
+            let issueChart;
+            let rowIdCounter = 1;
+
+            const createChart = (labels, totalData, remainingData) => {
+                if (issueChart) {
+                    issueChart.destroy();
+                }
+                const ctx = issueChartCanvas.getContext('2d');
+                issueChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '총 건수',
+                            data: totalData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '잔여 건수',
+                            data: remainingData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '건수'
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const updateMetrics = (totalDefect, totalIssues, totalRemaining) => {
+                const defectRate = totalIssues > 0 ? (totalDefect / totalIssues * 100).toFixed(1) : 0;
+                const remainingRate = totalIssues > 0 ? (totalRemaining / totalIssues * 100).toFixed(1) : 0;
+                
+                document.getElementById('defectRate').innerText = `${defectRate}%`;
+                document.getElementById('remainingRate').innerText = `${remainingRate}%`;
+                document.getElementById('avgResolutionTime').innerText = `1.5일`; // Placeholder
+                document.getElementById('testCoverage').innerText = `75%`; // Placeholder
+            };
+
+            const updateChart = () => {
+                const rows = Array.from(inputTableBody.querySelectorAll('tr[data-row-id]'));
+                
+                const combinedLabels = ['결함', '개선', '검토', '디자인'];
+                const combinedTotalData = [0, 0, 0, 0];
+                const combinedRemainingData = [0, 0, 0, 0];
+                
+                let itSubtotal = 0;
+                let otherSubtotal = 0;
+                let grandTotal = 0;
+
+                const subTotals = {
+                    it: { total: [0, 0, 0, 0], remaining: [0, 0, 0, 0] },
+                    others: { total: [0, 0, 0, 0], remaining: [0, 0, 0, 0] }
+                };
+
+                let totalDefect = 0;
+                let totalIssues = 0;
+                let totalRemaining = 0;
+
+                rows.forEach(row => {
+                    const department = row.querySelector('input[placeholder="부서명"]').value.trim();
+                    const inputs = row.querySelectorAll('input[type="number"]');
+                    const isIT = department === 'IT본부' || department.toLowerCase() === 'it본부';
+                    
+                    const rowTotal = (parseInt(inputs[0].value, 10) || 0) + 
+                                     (parseInt(inputs[2].value, 10) || 0) + 
+                                     (parseInt(inputs[4].value, 10) || 0) + 
+                                     (parseInt(inputs[6].value, 10) || 0);
+                    row.querySelector('.total-col').innerText = rowTotal;
+
+                    const totals = isIT ? subTotals.it.total : subTotals.others.total;
+                    const remainders = isIT ? subTotals.it.remaining : subTotals.others.remaining;
+
+                    totals[0] += parseInt(inputs[0].value, 10) || 0;
+                    remainders[0] += parseInt(inputs[1].value, 10) || 0;
+                    totals[1] += parseInt(inputs[2].value, 10) || 0;
+                    remainders[1] += parseInt(inputs[3].value, 10) || 0;
+                    totals[2] += parseInt(inputs[4].value, 10) || 0;
+                    remainders[2] += parseInt(inputs[5].value, 10) || 0;
+                    totals[3] += parseInt(inputs[6].value, 10) || 0;
+                    remainders[3] += parseInt(inputs[7].value, 10) || 0;
+                });
+                
+                itSubtotal = subTotals.it.total.reduce((sum, current) => sum + current, 0);
+                otherSubtotal = subTotals.others.total.reduce((sum, current) => sum + current, 0);
+                grandTotal = itSubtotal + otherSubtotal;
+                
+                combinedTotalData[0] = subTotals.it.total[0] + subTotals.others.total[0];
+                combinedRemainingData[0] = subTotals.it.remaining[0] + subTotals.others.remaining[0];
+                combinedTotalData[1] = subTotals.it.total[1] + subTotals.others.total[1];
+                combinedRemainingData[1] = subTotals.it.remaining[1] + subTotals.others.remaining[1];
+                combinedTotalData[2] = subTotals.it.total[2] + subTotals.others.total[2];
+                combinedRemainingData[2] = subTotals.it.remaining[2] + subTotals.others.remaining[2];
+                combinedTotalData[3] = subTotals.it.total[3] + subTotals.others.total[3];
+                combinedRemainingData[3] = subTotals.it.remaining[3] + subTotals.others.remaining[3];
+                
+                document.getElementById('itSubtotal').innerText = itSubtotal;
+                document.getElementById('itTotalDefect').innerText = subTotals.it.total[0];
+                document.getElementById('itRemainingDefect').innerText = subTotals.it.remaining[0];
+                document.getElementById('itTotalImprovement').innerText = subTotals.it.total[1];
+                document.getElementById('itRemainingImprovement').innerText = subTotals.it.remaining[1];
+                document.getElementById('itTotalReview').innerText = subTotals.it.total[2];
+                document.getElementById('itRemainingReview').innerText = subTotals.it.remaining[2];
+                document.getElementById('itTotalDesign').innerText = subTotals.it.total[3];
+                document.getElementById('itRemainingDesign').innerText = subTotals.it.remaining[3];
+                
+                document.getElementById('otherSubtotal').innerText = otherSubtotal;
+                document.getElementById('otherTotalDefect').innerText = subTotals.others.total[0];
+                document.getElementById('otherRemainingDefect').innerText = subTotals.others.remaining[0];
+                document.getElementById('otherTotalImprovement').innerText = subTotals.others.total[1];
+                document.getElementById('otherRemainingImprovement').innerText = subTotals.others.remaining[1];
+                document.getElementById('otherTotalReview').innerText = subTotals.others.total[2];
+                document.getElementById('otherRemainingReview').innerText = subTotals.others.remaining[2];
+                document.getElementById('otherTotalDesign').innerText = subTotals.others.total[3];
+                document.getElementById('otherRemainingDesign').innerText = subTotals.others.remaining[3];
+
+                document.getElementById('grandTotal').innerText = grandTotal;
+                document.getElementById('totalDefect').innerText = combinedTotalData[0];
+                document.getElementById('totalRemainingDefect').innerText = combinedRemainingData[0];
+                document.getElementById('totalImprovement').innerText = combinedTotalData[1];
+                document.getElementById('totalRemainingImprovement').innerText = combinedRemainingData[1];
+                document.getElementById('totalReview').innerText = combinedTotalData[2];
+                document.getElementById('totalRemainingReview').innerText = combinedRemainingData[2];
+                document.getElementById('totalDesign').innerText = combinedTotalData[3];
+                document.getElementById('totalRemainingDesign').innerText = combinedRemainingData[3];
+
+                totalDefect = combinedTotalData[0];
+                totalIssues = combinedTotalData.reduce((sum, current) => sum + current, 0);
+                totalRemaining = combinedRemainingData.reduce((sum, current) => sum + current, 0);
+
+                createChart(combinedLabels, combinedTotalData, combinedRemainingData);
+                updateMetrics(totalDefect, totalIssues, totalRemaining);
+            };
+
+            const createRow = () => {
+                if (rowIdCounter >= 50) {
+                    // alert 대신 메시지 박스 사용
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                            <p class="mb-4">최대 50개까지 추가할 수 있습니다.</p>
+                            <button onclick="this.parentNode.parentNode.remove()" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg">확인</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
+                    return;
+                }
+                rowIdCounter++;
+                const newRow = document.createElement('tr');
+                newRow.dataset.rowId = rowIdCounter;
+                newRow.innerHTML = `
+                    <td><input type="text" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" placeholder="담당자 이름"></td>
+                    <td><input type="text" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" placeholder="부서명"></td>
+                    <td class="total-col">0</td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><input type="number" class="w-full text-center rounded-md border-gray-300 shadow-sm p-2" value="0"></td>
+                    <td><button class="remove-row bg-gray-300 text-gray-700 p-2 rounded-md shadow-sm">-</button></td>
+                `;
+                inputTableBody.appendChild(newRow);
+                attachEventListeners(newRow);
+                updateChart();
+            };
+
+            const attachEventListeners = (row) => {
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateChart);
+                });
+                row.querySelector('.remove-row').addEventListener('click', () => {
+                    if (inputTableBody.querySelectorAll('tr[data-row-id]').length > 1) {
+                        row.remove();
+                        updateChart();
+                    }
+                });
+            };
+
+            addRowBtn.addEventListener('click', createRow);
+
+            const initialRow = inputTableBody.querySelector('tr');
+            if (initialRow) {
+                attachEventListeners(initialRow);
+            }
+
+            updateChart();
+        });
+    </script>
+</body>
+</html>
